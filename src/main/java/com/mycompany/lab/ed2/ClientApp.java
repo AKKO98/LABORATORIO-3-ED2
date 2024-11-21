@@ -34,7 +34,7 @@ public class ClientApp implements Runnable{
     }
     
     void Imprimirresultado(Result resultado){
-        System.out.println("\n\n El vector fue ordenado en " + resultado.getTime() / 1000 + " Segundos por " + clientName);
+        System.out.println("\n\n El vector fue ordenado en " + resultado.getTime() + " Milisegundos por " + clientName);
         System.out.println("Vector ordenado: " + Arrays.toString(resultado.getVector()));
     }
 
@@ -42,28 +42,23 @@ public class ClientApp implements Runnable{
     public void run() {
         System.out.println("Conexion exitosa con: " + clientName);
         try {
-            String serverMessage = "";
             String clientMessage = "";
             while (!clientMessage.equals("end_conexion")) {
                 switch (id) {
                     case 0 -> {
                         socketOut.writeObject(task);
-                        Result resultado = (Result) socketIn.readObject();
                         clientMessage = (String) socketIn.readObject();
+                        Result resultado = (Result) socketIn.readObject();
                         if (resultado != null) {
                             Imprimirresultado(resultado);
-                        } else {
-                            System.out.println("Es nullo");
                         }
                     }
                     
                     default -> {
-                        Result resultado = (Result) socketIn.readObject();
                         clientMessage = (String) socketIn.readObject();
+                        Result resultado = (Result) socketIn.readObject();
                         if (resultado != null) {
                             Imprimirresultado(resultado);
-                        } else {
-                            println("Es nullo");
                         }
                     }
                 }
@@ -72,7 +67,7 @@ public class ClientApp implements Runnable{
             socket.close();
             
             System.out.println("Conexion terminada exitosamente con " + clientName);
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException e) {
             println("Ocurrio un error en la conexion");
         }
     }

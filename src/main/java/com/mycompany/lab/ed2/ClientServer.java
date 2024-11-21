@@ -17,14 +17,14 @@ public class ClientServer {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int n = 25000000;
-        double t = 2;
-        int choice = 1;
+        int n = 500000;
+        double t = 400;
+        int choice = 2;
         int count = 0;
 
         // Elegir algoritmo
         System.out.println("Seleccione el algoritmo: ");
-        System.out.println("1. QuickSort\n2. Heapsort\n3. MergeSort");
+        System.out.println("1. QuickSort\n2. MergeSort\n3. HeapSort");
         //choice = scanner.nextInt();
 
         // Elegir tamaño del vector y tiempo límite
@@ -36,6 +36,7 @@ public class ClientServer {
         // Generar vector aleatorio
         int[] vector = new Random().ints(n, 0, 100000).toArray();
         Task task = new Task(vector, choice, t);
+        
         //Procesamiento de datos con los Worker_0 y Worker_1
         try {
             ServerSocket serverSocket = new ServerSocket(SERVER_PORT);

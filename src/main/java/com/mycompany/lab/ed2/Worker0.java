@@ -47,29 +47,30 @@ public class Worker0 extends Worker {
                         }
                         case 2 -> { // MergeSort
                             if (!work.sorter.isFinished()) {
-                                
+                                work.sorter.startMergeSort((int) work.task.getTime());
                             }
-
                         }
                         case 3 -> { // HeapSort
                             if (!work.sorter.isFinished()) {
-                                
+                                work.sorter.startHeapSort((int) work.task.getTime());
                             }
 
                         }
                     }
 
                     if (work.sorter.isFinished() && !work.meta) {
-                        var totalTime = (System.currentTimeMillis() - work.startTime) / (long) task.getTime();
-                        socketOut.writeObject(new Result(work.sorter.getArray(), totalTime));
+                        var totalTime = (System.currentTimeMillis() - work.startTime);
                         socketOut.writeObject("end_conexion");
+                        socketOut.writeObject(new Result(work.sorter.getArray(), totalTime));
                         System.out.println("worker0 termino primero");
                         work.meta = true;
                         workerSocketOut.writeObject(work);
+                        workerSocketOut.flush();
                     } else {
                         System.out.println("Se paso del tiempo!");
                         System.out.println("Enviando a <Worker_1>");
                         workerSocketOut.writeObject(work);
+                        workerSocketOut.flush();
                         work = (WorkToDo) workerSocketIn.readObject();
                         if (work.meta) {
                                 socketOut.writeObject("end_conexion");

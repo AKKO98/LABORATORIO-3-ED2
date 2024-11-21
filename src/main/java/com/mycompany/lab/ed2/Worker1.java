@@ -20,7 +20,6 @@ public class Worker1 extends Worker {
 
     public static void main(String[] args) {
         //Trata de conectar al servidor (ClientServer)
-        boolean finish = false;
         do {
 
             try (
@@ -47,36 +46,38 @@ public class Worker1 extends Worker {
                             case 2 -> { // MergeSort
 
                                 if (!work.sorter.isFinished()) {
-
+                                    work.sorter.resumeMergeSort();
                                 }
 
                             }
                             case 3 -> { // HeapSort
 
                                 if (!work.sorter.isFinished()) {
-
+                                    work.sorter.resumeHeapSort();
                                 }
 
                             }
                         }
                         if (work.sorter.isFinished() && !work.meta) {
                             long endTime = System.currentTimeMillis();
-                            var totalTime = (endTime - work.startTime) / (long) work.task.getTime();
-                            socketOut.writeObject(new Result(work.sorter.getArray(), totalTime));
+                            var totalTime = (endTime - work.startTime);
                             socketOut.writeObject("end_conexion");
+                            socketOut.writeObject(new Result(work.sorter.getArray(), totalTime));
                             System.out.println("Worker1 termino primero");
                             work.meta = true;
+                            Worker0.readiToConnect = false;
                             workerSocketOut.writeObject(work);
+                            
                         } else {
                             System.out.println("Tiempo de espera superado!");
                             System.out.println("Enviando a <Worker_0>");
                             workerSocketOut.writeObject(work);
+                            workerSocketOut.flush();
                             work = (WorkToDo) workerSocketIn.readObject();
                             if (work.meta) {
                                 socketOut.writeObject("end_conexion");
                                 socketOut.writeObject(null);
                                 socketWorker.close();
-                                finish = true;
                             } else {
                                 System.out.println("Recibido work to do");
                             }
@@ -99,6 +100,6 @@ public class Worker1 extends Worker {
                 }
             }
 
-        } while (!Worker0.readiToConnect && !finish);
+        } while (!Worker0.readiToConnect);
     }
 }
