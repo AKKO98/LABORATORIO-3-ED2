@@ -17,8 +17,8 @@ public class ClientServer {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int n = 500000;
-        double t = 400;
+        int n = 10;
+        double t = 1;
         int choice = 2;
         int count = 0;
 

@@ -16,7 +16,7 @@ public class ClientApp implements Runnable{
     private int id;
     private String clientName;
     private Task task;
-    private ObjectInputStream socketIn;
+    private ObjectInputStream socketIn; 
     private ObjectOutputStream socketOut;
     
 

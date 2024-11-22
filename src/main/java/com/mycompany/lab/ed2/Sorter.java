@@ -72,7 +72,6 @@ public class Sorter implements Serializable {
             }
         }
 
-
     }
 
     public void resumeQuickSort() {
@@ -116,70 +115,67 @@ public class Sorter implements Serializable {
         this.timeLimitMillis = t * 1000;
         this.startTime = System.currentTimeMillis();
 
-        // Inicializa el arreglo temporal y las particiones si es la primera ejecución
-        if (tempArray == null) {
-            tempArray = new int[array.length];
-            stack.push(new int[]{0, array.length - 1}); // Empieza con todo el arreglo
+        if (stack.isEmpty()) {
+            // Inicializa el tamaño de los subsegmentos en 1
+            stack.push(new int[]{1, array.length});
         }
 
-        // Iterativo usando la pila
         while (!stack.isEmpty()) {
             if ((System.currentTimeMillis() - startTime) >= timeLimitMillis) {
-                acomulatedTime += t * 1000;
+                acomulatedTime += System.currentTimeMillis() - startTime;
                 break;
             }
 
+            // Obtiene el tamaño actual de los subsegmentos y el tamaño total del arreglo
             int[] range = stack.pop();
-            left = range[0];
-            right = range[1];
+            int currentSize = range[0];
+            int totalSize = range[1];
 
-            if (left < right) {
-                mid = left + (right - left) / 2;
+            if (currentSize < totalSize) {
+                // Fusiona subsegmentos de tamaño `currentSize`
+                for (int left = 0; left < totalSize - currentSize; left += 2 * currentSize) {
+                    int mid = left + currentSize - 1;
+                    int right = Math.min(left + 2 * currentSize - 1, totalSize - 1);
 
-                // Primero procesa las particiones inferiores
-                stack.push(new int[]{left, right});     // Marca para fusión
-                stack.push(new int[]{mid + 1, right}); // Derecha
-                stack.push(new int[]{left, mid});      // Izquierda
-            } else {
-                // Fusiona los rangos cuando ya están particionados
-                if (!stack.isEmpty() && stack.peek()[0] == left && stack.peek()[1] == right) {
-                    stack.pop(); // Marca como fusionado
-                    merge();
+                    merge(left, mid, right);
                 }
-            }
-            if (stack.isEmpty()) {
-                finished = true; // Marca como terminado si la pila está vacía
-                tempArray = null; // Libera el arreglo temporal
+
+                // Incrementa el tamaño de los subsegmentos y vuelve a procesar
+                stack.push(new int[]{currentSize * 2, totalSize});
+            } else {
+                // Finaliza cuando el tamaño del subsegmento cubre todo el arreglo
                 acomulatedTime += System.currentTimeMillis() - startTime;
+                finished = true;
                 break;
             }
         }
     }
 
-// Método auxiliar para fusionar
-    private void merge() {
-        // Copia el rango actual al arreglo temporal
-        for (int i = left; i <= right; i++) {
-            tempArray[i] = array[i];
-        }
+    private void merge(int left, int mid, int right) {
+        int[] tempArray = new int[right - left + 1];
+        int i = left, j = mid + 1, k = 0;
 
-        int i = left, j = mid + 1, k = left;
-
-        // Fusión de dos subarreglos ordenados
+        // Combina elementos de ambas mitades
         while (i <= mid && j <= right) {
-            if (tempArray[i] <= tempArray[j]) {
-                array[k++] = tempArray[i++];
+            if (array[i] <= array[j]) {
+                tempArray[k++] = array[i++];
             } else {
-                array[k++] = tempArray[j++];
+                tempArray[k++] = array[j++];
             }
         }
 
-        // Copia los elementos restantes del lado izquierdo
+        // Copia los elementos restantes de la primera mitad
         while (i <= mid) {
-            array[k++] = tempArray[i++];
+            tempArray[k++] = array[i++];
         }
 
-        // Los elementos del lado derecho ya están en su lugar
+        // Copia los elementos restantes de la segunda mitad
+        while (j <= right) {
+            tempArray[k++] = array[j++];
+        }
+
+        // Copia el arreglo temporal de vuelta al original
+        System.arraycopy(tempArray, 0, array, left, tempArray.length);
     }
 
     public void startHeapSort(int t) {
@@ -187,15 +183,15 @@ public class Sorter implements Serializable {
         this.startTime = System.currentTimeMillis();
 
         if (stack.isEmpty()) {
-            // Paso 1: Construcción del montón
+            // Construcción del montón inicial
             for (int i = array.length / 2 - 1; i >= 0; i--) {
-                stack.push(new int[]{i, array.length - 1}); // Rango [i, n-1] para aplicar heapify
+                stack.push(new int[]{i, array.length - 1});
             }
         }
 
         while (!stack.isEmpty()) {
             if ((System.currentTimeMillis() - startTime) >= timeLimitMillis) {
-                acomulatedTime += t * 1000;
+                acomulatedTime += System.currentTimeMillis() - startTime;
                 break;
             }
 
@@ -206,17 +202,17 @@ public class Sorter implements Serializable {
             heapify(n, i);
 
             if (stack.isEmpty() && n > 0) {
-                // Paso 2: Intercambio y reducción del montón
-                swap(0, n);
-                stack.push(new int[]{0, n - 1}); // Reconstruir el montón para el rango reducido
+                // Intercambiar raíz con el último elemento
+                swap(0, n - 1);
+                stack.push(new int[]{0, n - 2}); // Reconstruir el montón con rango reducido
             }
+
             if (stack.isEmpty()) {
                 acomulatedTime += System.currentTimeMillis() - startTime;
-                finished = true; // Marca como terminado si la pila está vacía
+                finished = true; // Marca como terminado
                 break;
             }
         }
-
     }
 
 // Método auxiliar para mantener la propiedad del montón
